@@ -2,27 +2,26 @@
 
 Live app: https://mdmortuzahossain.github.io/waveform-video-fast/
 
-A single-file static app that turns uploaded audio into an animated, scrolling amplitude waveform video. Uses WebCodecs through Mediabunny 1.61.4 to encode frames directly, without audio playback or real-time MediaRecorder capture.
+Single-file GitHub Pages app. Upload audio to silently render an animated waveform video with WebCodecs and Mediabunny 1.61.4. No real-time playback is required. Automatic download has a manual fallback.
 
-## Use
+## Controls
 
-Open the app in a current desktop Chrome or Edge browser. Choose colors, background, title, resolution, and frame rate before selecting an audio file. File selection starts processing automatically. When the video is complete, an automatic download is requested; a manual download link remains available if the browser blocks it.
+All nine styles remain: bars, line, center-out, bottom, circle, radial rays, twin wave, layered ribbon, and dots. Videos contain no text. Customize two waveform colors, width, solid/gradient/image backgrounds, 360p/720p/1080p, and 6/8/12/24/30 FPS.
 
-For long audio, start with 360p / 12 FPS. Higher resolution and frame rate increase encoding time. Processing speed is measured and displayed; no fixed completion time is guaranteed.
+Small (default), Balanced, and High control video bitrate. High preserves previous video bitrate budgets. Audio offers 64/96/128/192 kbps; default 96. Select Auto (MP4 preferred), explicit MP4, or WebM (VP9 preferred, VP8 fallback). Unsupported explicit formats report an error. Small at 360p/12 FPS targets 240 kbps video plus 96 kbps audio, versus the previous 700+128 kbps. Estimates are bitrate budgets, not guaranteed file sizes. Image backgrounds and complex motion can affect compression.
 
-## Implementation
+## Implementation and limits
 
-- Reads audio via a BlobSource and AudioBufferSink in two passes.
-- Stores a compact 200 Hz peak amplitude envelope, rather than retaining the entire decoded audio track.
-- Generates timestamped canvas frames and encodes audio/video concurrently in quarter-second chunks with backpressure.
-- Tries H.264/AAC MP4 first, then VP8/Opus WebM depending on codec availability.
-- Preserves audible audio in the resulting video. Processing itself is silent.
-- Supports cancellation, progress, reusable export, gradients, and uploaded images.
+- Two streaming decode passes; compact peak envelope and frequency-band arrays.
+- Reused FFT buffers, precomputed window/twiddles, media-time smoothing.
+- Audio/video encoded concurrently in bounded quarter-second batches.
+- Variable video bitrate and six-second keyframe spacing.
+- Progress, cancellation, retry, and local-only file processing.
+- Final output held in RAM; estimated outputs over 850 MiB rejected. Inputs limited to 500 MiB and eight hours. Device memory can impose lower limits.
+- Use current desktop Chrome/Edge. Encoding speed and codec support depend on hardware/browser. VP9 may be slower.
 
-The final encoded file is held in memory for download. Estimated outputs above 850 MiB are rejected; actual memory limits depend on the device. Input limit: 500 MiB. No file is sent to a server. Tailwind and the pinned media library load from CDNs.
+Choose settings before uploading, or change settings and use the retry button afterward. Start with 360p/12 FPS/Small for long audio. No speed or exact size guarantee.
 
-## Hosting
+Deploy main branch root with GitHub Pages; no build or server required. Tailwind and pinned Mediabunny load from CDNs.
 
-GitHub Pages: deploy main branch / root. No build step, backend, API key, cross-origin isolation, or installation is required.
-
-Media library documentation: https://mediabunny.dev/guide/writing-media-files
+Documentation: https://mediabunny.dev/guide/writing-media-files
